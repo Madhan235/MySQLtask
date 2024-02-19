@@ -1,26 +1,205 @@
+IMDB Design a DB for IMDB 1. Movie should have multiple media(Video or Image) 2. Movie can belongs to multiple Genre 3. Movie can have multiple reviews and Review can belongs to a user 4. Artist can have multiple skills 5. Artist can perform multiple role in a single film;
+
+You have to create a separate table for movies, genres, users, skills, and artists. Then create the mapping tables like movie-genre, movie-review, artist-role in movie and etc. And also describe the relationship between the tables.
+
 IMDB
 
-create table movies(
-media bolb,
-name varchar(20) not null,
-genre varchar(20) not null,
-artists varchar(20) not null,    
-review varchar(200) not nullt,
-)
+  Movie's Table(with Genre and Review) :
 
-insert into movies(media) values(
-https://m.media-amazon.com/images/M/MV5BNDUzODNkMTYtN2UyMC00OWQ1LWJmMmEtZGFiNjRkZjdmMDE4XkEyXkFqcGdeQXVyMTA3MTI2ODc5._V1_.jpg,
-https://cdn.gulte.com/wp-content/uploads/2022/10/ponn.jpg ,
-https://timesofindia.indiatimes.com/photo/99722979.jpeg,
+CREATE TABLE Movies (
+    movie_id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    release_year INT,
+    genre_id INT,
+    review_id INT,
+    media_id INT,
+    FOREIGN KEY (genre_id) REFERENCES Genres(genre_id),
+    FOREIGN KEY (review_id) REFERENCES Movie_Review(review_id)
+);
 
-)
-insert into movies(name) values(
-    dada,
-    ponniyin selvan-1,
-    ponniyin selvan-2,
-)
-insert into movies(genre) values(
-    sentiment,
-    drama,
-    drama,
-)
+CREATE TABLE Movie_Media (
+    media_id INT AUTO_INCREMENT PRIMARY KEY,
+    movie_id INT,
+    media_type ENUM('Image', 'Video') NOT NULL,
+    media_url VARCHAR(255) NOT NULL,
+    FOREIGN KEY (movie_id) REFERENCES Movies(movie_id)
+);
+ 
+INSERT INTO Movie_Media (movie_id, media_type, media_url)
+VALUES
+(1, 'Image', 'http://example.com/inception.jpg'),   
+(1, 'Video', 'http://example.com/inception.mp4'),   
+(2, 'Image', 'http://example.com/shawshank_redemption.jpg'),   
+(2, 'Video', 'http://example.com/shawshank_redemption.mp4'),   
+(3, 'Image', 'http://example.com/godfather.jpg'),  
+(3, 'Video', 'http://example.com/godfather.mp4'),   
+(4, 'Image', 'http://example.com/dark_knight.jpg'),   
+(4, 'Video', 'http://example.com/dark_knight.mp4');
+
+Genre's Table :
+
+CREATE TABLE Genres (
+    genre_id INT AUTO_INCREMENT PRIMARY KEY,
+    genre_name VARCHAR(255) NOT NULL
+);
+
+INSERT INTO Genres (genre_name) VALUES
+('Action'),
+('Adventure'),
+('Comedy'),
+('Drama'),
+('Fantasy'),
+('Horror'),
+('Romance'),
+('Science Fiction'),
+('Thriller'),
+('Animation');
+
+
+User's Table: 
+
+CREATE TABLE Users (
+    user_id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL
+);
+
+INSERT INTO Users (username, email, password) VALUES
+('john_doe', 'john@example.com', 'hashed_password_1'),
+('jane_smith', 'jane@example.com', 'hashed_password_2'),
+('bob_jenkins', 'bob@example.com', 'hashed_password_3');
+
+
+Artist's table:
+
+CREATE TABLE Artists (
+    artist_id INT AUTO_INCREMENT PRIMARY KEY,
+    artist_name VARCHAR(255) NOT NULL,
+    artist_type ENUM('actor', 'actress', 'director') NOT NULL
+);
+
+INSERT INTO Artists (artist_name, artist_type) VALUES
+('Leonardo DiCaprio', 'actor'),
+('Tom Hanks', 'actor'),
+('Meryl Streep', 'actress'),
+('Christopher Nolan', 'director'),
+('Quentin Tarantino', 'director');
+
+
+Skill's table:
+
+CREATE TABLE Skills (
+    skill_id INT AUTO_INCREMENT PRIMARY KEY,
+    skill_name VARCHAR(255) NOT NULL
+);
+
+INSERT INTO Skills (skill_name) VALUES
+('Movie Reviewing'),
+('Movie Editing'),
+('Script Writing'),
+('Cinematography'),
+('Sound Editing'),
+('Acting'),
+('Directing'),
+('Film Production');
+
+
+
+Review's Table : 
+
+CREATE TABLE Movie_Review (
+    review_id INT AUTO_INCREMENT PRIMARY KEY,
+    movie_id INT,
+    user_id INT,
+    review_text TEXT,
+    rating DECIMAL(3,1),
+    FOREIGN KEY (movie_id) REFERENCES Movies(movie_id),
+    FOREIGN KEY (user_id) REFERENCES Users(user_id)
+);
+
+INSERT INTO Movie_Review (movie_id, user_id, review_text, rating) VALUES
+(1, 1, 'Inception is a mind-bending masterpiece!', 9.5),
+(2, 2, 'The Shawshank Redemption is an absolute classic.', 10.0),
+(3, 3, 'The Godfather is a cinematic masterpiece!', 9.8),
+(4, 1, 'The Dark Knight is an intense and thrilling ride.', 9.7);
+
+
+Artist's Role Table : 
+
+CREATE TABLE Artist_Role (
+    movie_id INT,
+    artist_id INT,
+    role VARCHAR(255),
+    FOREIGN KEY (movie_id) REFERENCES Movies(movie_id),
+    FOREIGN KEY (artist_id) REFERENCES Artists(artist_id)
+);
+
+INSERT INTO Artist_Role (movie_id, artist_id, role) VALUES
+(1, 1, 'Lead Actor'),
+(1, 4, 'Director'),
+(2, 2, 'Lead Actor'),
+(2, 3, 'Lead Actor'),
+(2, 4, 'Director'),
+(3, 5, 'Director'),
+(4, 1, 'Lead Actor'),
+(4, 4, 'Director');
+
+
+1. Movie should have multiple media(Video or Image):
+
+ CREATE TABLE Movie_Media (
+    media_id INT AUTO_INCREMENT PRIMARY KEY,
+    movie_id INT,
+    media_type ENUM('Video', 'Image') NOT NULL,
+    media_url VARCHAR(255) NOT NULL,
+    FOREIGN KEY (movie_id) REFERENCES Movies(movie_id)
+);
+
+ 2. Movie can belongs to multiple Genre :
+ 
+ 
+ CREATE TABLE Movie_Genre (
+    movie_id INT,
+    genre_id INT,
+    PRIMARY KEY (movie_id, genre_id),
+    FOREIGN KEY (movie_id) REFERENCES Movies(movie_id),
+    FOREIGN KEY (genre_id) REFERENCES Genres(genre_id)
+);
+ 
+ 
+  3. Movie can have multiple reviews and Review can belongs to a user : 
+  
+  CREATE TABLE Movie_Review (
+    review_id INT AUTO_INCREMENT PRIMARY KEY,
+    movie_id INT,
+    user_id INT,
+    review_text TEXT,
+    rating DECIMAL(3,1),
+    FOREIGN KEY (movie_id) REFERENCES Movies(movie_id),
+    FOREIGN KEY (user_id) REFERENCES Users(user_id)
+);
+  
+  4. Artist can have multiple skills :
+  
+  CREATE TABLE Artist_Skill (
+    artist_id INT,
+    skill_id INT,
+    FOREIGN KEY (artist_id) REFERENCES Artists(artist_id),
+    FOREIGN KEY (skill_id) REFERENCES Skills(skill_id)
+);
+  
+  
+   5. Artist can perform multiple role in a single film :
+
+CREATE TABLE Artist_Role (
+    artist_id INT,
+    movie_id INT,
+    role VARCHAR(255),
+    FOREIGN KEY (artist_id) REFERENCES Artists(artist_id),
+    FOREIGN KEY (movie_id) REFERENCES Movies(movie_id)
+);
+
+
+
+You have to create a separate table for movies, genres, users, skills, and artists. Then create the mapping tables like movie-genre, movie-review, artist-role in movie and etc. And also describe the relationship between the tables.
